@@ -116,6 +116,8 @@ func (s *Scanner) QuoteMultiline(start, end string, esc Escaper) string {
 		}
 	}
 	out.WriteString(s.line[s.pos : s.pos+l])
+	s.pos += l + len(end)
+	s.space()
 	return out.String()
 }
 

@@ -160,3 +160,38 @@ func TestMultilineEscape(t *testing.T) {
 		}
 	}
 }
+
+func TestQuoteNext(t *testing.T) {
+	tests := []struct {
+		in string
+		ml bool
+	}{
+		{`"" nextToken`, false},
+		{`[[]] nextToken`, true},
+		{`"test" nextToken`, false},
+		{`[[test]] nextToken`, true},
+		{`[[multi
+		line
+		test]] nextToken`, true},
+		{`[[multi
+		line
+		test]]
+nextToken`, true},
+	}
+
+	for _, test := range tests {
+		sc := FromString(test.in)
+		if test.ml {
+			sc.QuoteMultiline("[[", "]]", GoEscaper(0))
+		} else {
+			sc.Quote(`"`, `"`, GoEscaper(0))
+		}
+		if next := sc.Ident(); next != "nextToken" {
+			if sc.Err() != nil {
+				t.Errorf("input %q produced error: %s", test.in, sc.Err())
+			} else {
+				t.Errorf("input %q produced %s instead of \"nextToken\"", test.in, next)
+			}
+		}
+	}
+}
